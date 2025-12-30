@@ -28,6 +28,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setItems(JSON.parse(savedCart));
       } catch (error) {
         console.error("Failed to parse cart from local storage", error);
@@ -44,7 +45,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => {
       const existingItem = prev.find((item) => item.id === product.id);
       // Check if the input product has a specific quantity property (cast to any or extend type)
-      const quantityToAdd = (product as any).quantity || 1;
+      const quantityToAdd = (product as Partial<CartItem>).quantity || 1;
 
       if (existingItem) {
         toast.success("Updated quantity in cart");
