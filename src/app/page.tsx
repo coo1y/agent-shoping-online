@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Laptop, Smartphone, Headphones, Zap, Monitor, Watch, Camera } from "lucide-react";
+import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import { Laptop, Smartphone, Headphones, Zap, Monitor, Watch, Camera } from "lucide-react";
 import { getProducts } from "@/lib/api";
 
 export default async function Home() {

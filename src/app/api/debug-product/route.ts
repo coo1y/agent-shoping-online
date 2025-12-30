@@ -32,11 +32,13 @@ export async function GET(request: Request) {
         backend_url: `${BACKEND_URL.replace(/\/$/, "")}/api/products/${id}`
       }, { status: 404 });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
     return NextResponse.json({ 
       status: 'error', 
-      message: error.message,
-      stack: error.stack
+      message: errorMessage,
+      stack: errorStack
     }, { status: 500 });
   }
 }

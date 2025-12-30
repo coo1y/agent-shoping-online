@@ -18,12 +18,13 @@ export async function POST(request: Request) {
       body: bodyText,
       cache: "no-store",
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
     return NextResponse.json(
       {
         error: "Failed to reach backend",
         backend_url: BACKEND_URL,
-        message: e?.message ?? String(e),
+        message: errorMessage,
       },
       { status: 502 }
     );

@@ -158,7 +158,7 @@ export default async function ShopPage(props: ShopPageProps) {
                                 <Search className="h-8 w-8 text-gray-400" />
                             </div>
                             <h3 className="text-xl font-bold mb-2">No products found</h3>
-                            <p className="text-muted-foreground mb-6 max-w-sm">We couldn't find any products matching your current filters.</p>
+                            <p className="text-muted-foreground mb-6 max-w-sm">We couldn&apos;t find any products matching your current filters.</p>
                             <Button asChild variant="outline">
                                 <Link href="/shop">Clear Filters</Link>
                             </Button>

@@ -4,7 +4,6 @@ import { ArrowLeft } from "lucide-react";
 import { getProduct } from "@/lib/api";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { Separator } from "@/components/ui/separator";
-import { Check, Star, Truck, ShieldCheck, Heart, Share2 } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
