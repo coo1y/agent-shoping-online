@@ -1,6 +1,8 @@
-# TechShop — AI Shopping Assistant (Streaming + Tool Calling)
+# TechShop — AI Shopping Assistant
 
-TechShop is a full-stack demo of an **AI-powered shopping assistant**.
+TechShop is a **reference implementation** demonstrating how to design and ship **AI-powered systems** with streaming responses, tool calling, deterministic side effects, and evaluation loops.
+
+The focus is not just on prompting, but on **agent reliability, UI state synchronization, and production-style guardrails** that are required in real-world AI/ML applications.
 
 - The **frontend** (Next.js) provides a modern chat widget and a cart experience.
 - The **backend** (FastAPI + Postgres) runs a **LangGraph agent** with tool-calling for product search and cart actions.
@@ -28,6 +30,25 @@ Next.js (UI)  --->  Next.js /api/chat (proxy, streaming)  --->  FastAPI /api/cha
    |
 CartProvider (local state)  <--- action blocks --->  Postgres (cart/products)
 ```
+
+## Key design decisions
+
+- **Streaming + structured actions**  
+  The agent streams natural language tokens while emitting explicit JSON action
+  blocks for side effects (e.g. cart updates, navigation).  
+  This avoids brittle text parsing and keeps frontend state updates deterministic.
+
+- **LangGraph over ad-hoc agent loops**  
+  LangGraph provides explicit control flow, step limits, and better debuggability
+  compared to custom while-loop agents.
+
+- **Postgres-backed cart state**  
+  Cart state is persisted in the database instead of relying on model memory,
+  preventing hallucinated state and enabling idempotent operations.
+
+- **Opt-in real-LLM evals**  
+  Tool-calling accuracy is validated against a real model to catch regressions,
+  while remaining skipped by default to avoid unnecessary API cost.
 
 ## Tech stack
 
@@ -159,12 +180,17 @@ Notes:
 
 Try these in the chat widget:
 
-- “Suggest me a phone under $800 for photography.”
-- “Show me accessories from Apple.”
-- “Add the first result to my cart.”
+- “Suggest me a phone.”
+- “Show me some laptops.”
 - “Increase the quantity to 2.”
 - “Show my cart.”
 
+## Repo layout
+```
+frontend/   # Next.js app, streaming chat UI, cart state handling  
+backend/    # FastAPI app, LangGraph agent, tools, database logic  
+data/       # SQL seed data for products
+```
 ## Configuration
 
 - **System prompt**: `backend/app/config/prompts.yaml`
@@ -234,6 +260,17 @@ make lint-backend
 
 - **Rate limiting**
   - The chat endpoint is rate limited (`10/minute`). If you hit limits, wait a bit and retry.
+
+## Known limitations & future improvements
+
+- Single-user cart model (no authentication)
+- Demo-scale product catalog and search
+- No embedding-based semantic retrieval yet
+- Limited observability beyond logging and LangSmith tracing
+
+Future improvements could include per-user carts, semantic search with embeddings,
+retry/reconciliation logic for failed tool calls, and richer agent metrics for
+tuning and evaluation.
 
 ## License
 
