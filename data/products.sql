@@ -1,7 +1,7 @@
 CREATE TABLE if not exists products (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-  -- internal stable id (ใช้ในระบบ/agent tool calls)
+  -- internal stable id
   product_id      TEXT UNIQUE NOT NULL,         -- เช่น "PHN-APL-IPH15-128-BLK"
   name            TEXT NOT NULL,
   brand           TEXT NOT NULL,
@@ -10,13 +10,13 @@ CREATE TABLE if not exists products (
   price_cents     INTEGER NOT NULL CHECK (price_cents >= 0),
   currency        CHAR(3) NOT NULL DEFAULT 'USD',
 
-  -- สำหรับ typo/คำพ้อง/ชื่อที่คนชอบเรียก
+  -- for typo/aliases
   aliases         TEXT[] NOT NULL DEFAULT '{}',  -- เช่น {"iphone15","ไอโฟน 15","ip 15"}
 
-  -- ฟิลด์สเปคแบบยืดหยุ่น (มือถือ/โน้ตบุ๊ค/อุปกรณ์เสริมคนละชุดกัน)
+  -- specs
   specs           JSONB NOT NULL DEFAULT '{}'::jsonb,
 
-  -- ช่วย ranking แบบง่าย
+  -- rating
   rating          NUMERIC(2,1),                  -- 0.0-5.0 (optional)
   popularity      INTEGER NOT NULL DEFAULT 0,    -- optional
 
@@ -27,40 +27,32 @@ CREATE TABLE if not exists products (
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- index สำหรับค้นหาเร็ว
+-- index
 CREATE INDEX if not exists products_category_idx ON products(category);
 CREATE INDEX if not exists products_brand_idx ON products(brand);
 CREATE INDEX if not exists products_price_idx ON products(price_cents);
 CREATE INDEX if not exists products_specs_gin_idx ON products USING GIN (specs);
-
-CREATE TABLE if not exists carts (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id  TEXT UNIQUE NOT NULL,
-  currency    CHAR(3) NOT NULL DEFAULT 'SGD',
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
-);
 
 -- Apple
 INSERT INTO products
 (product_id, name, brand, category, price_cents, currency, aliases, specs, rating, popularity)
 VALUES
 ('A1001','iPhone 16','Apple','phone',79900,'USD',
- ARRAY['iphone16','ไอโฟน16'],
+ ARRAY['iphone16'],
  '{ "brand":"Apple","model":"iPhone 16","chip":"A18","battery_mah":3279,
     "camera_rear_mp":48,"camera_front_mp":12,"screen_size_inch":6.1,
     "refresh_rate_hz":60,"network":"5G","weight_g":172 }',
  4.8,150),
 
 ('A1002','iPhone 16 Pro','Apple','phone',99900,'USD',
- ARRAY['iphone16pro','ไอโฟน16โปร'],
+ ARRAY['iphone16pro'],
  '{ "brand":"Apple","model":"iPhone 16 Pro","chip":"A18 Pro","battery_mah":3350,
     "camera_rear_mp":48,"camera_front_mp":12,"screen_size_inch":6.1,
     "refresh_rate_hz":120,"network":"5G","weight_g":187 }',
  4.9,180),
 
 ('A1003','iPhone 16 Pro Max','Apple','phone',119900,'USD',
- ARRAY['iphone16promax','ไอโฟน16โปรแม็ก'],
+ ARRAY['iphone16promax'],
  '{ "brand":"Apple","model":"iPhone 16 Pro Max","chip":"A18 Pro","battery_mah":4422,
     "camera_rear_mp":48,"camera_front_mp":12,"screen_size_inch":6.7,
     "refresh_rate_hz":120,"network":"5G","weight_g":221 }',
@@ -219,7 +211,7 @@ VALUES
 ),
 
 ('31003', 'Dell Alienware m16 R2', 'Dell', 'laptop', 149999, 'USD',
- ARRAY['alienware m16 r2','m16r2','เอเลี่ยนแวร์ m16 r2'],
+ ARRAY['alienware m16 r2','m16r2'],
  '{
    "brand":"Dell",
    "model":"Alienware m16 R2",
@@ -392,7 +384,7 @@ VALUES
 -- Charger / Adapter (5)
 -- =================================
 ('40001','Apple 20W USB-C Power Adapter','Apple','accessory',1900,'USD',
- ARRAY['apple 20w charger','ที่ชาร์จไอโฟน 20w'],
+ ARRAY['apple 20w charger'],
  '{
    "type":"charger",
    "output_watt":20,
@@ -449,7 +441,7 @@ VALUES
 -- Headphone / Earbuds (5)
 -- =================================
 ('40006','Apple AirPods Pro (2nd Gen)','Apple','accessory',24900,'USD',
- ARRAY['airpods pro 2','แอร์พอดโปร'],
+ ARRAY['airpods pro 2'],
  '{
    "type":"earbuds",
    "wireless":true,

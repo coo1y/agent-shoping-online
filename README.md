@@ -60,12 +60,28 @@ make install
 
 ### 3) Set environment variables
 
-Create a `.env` file (recommended) or export environment variables in your shell.
+Copy the example environment file:
+
+```bash
+cp backend/template.env .env
+```
+
+Edit `.env` to set your keys.
 
 Required:
 
 ```bash
 export OPENAI_API_KEY="YOUR_KEY_HERE"
+```
+
+Optional (LangSmith Tracing):
+
+```bash
+# Enable LangSmith tracing (highly recommended for debugging agents)
+export LANGSMITH_TRACING=true
+export LANGSMITH_ENDPOINT="https://api.smith.langchain.com"
+export LANGSMITH_API_KEY="YOUR_LANGSMITH_KEY"
+export LANGSMITH_PROJECT="techshop_agent"
 ```
 
 Optional (defaults shown):
@@ -76,8 +92,14 @@ export DATABASE_URL="postgresql://user:password@localhost:5433/techshop"
 
 ### 4) Seed the database
 
+Use the provided SQL file to insert products:
+
 ```bash
-make seed
+# If you have psql installed:
+psql "postgresql://user:password@localhost:5433/techshop" -f data/products.sql
+
+# OR using Docker:
+docker compose exec -T db psql -U user -d techshop < data/products.sql
 ```
 
 ### 5) Run backend + frontend (two terminals)
