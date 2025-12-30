@@ -1,36 +1,218 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TechShop — AI Shopping Assistant (Streaming + Tool Calling)
 
-## Getting Started
+TechShop is a full-stack demo of an **AI-powered shopping assistant**.
 
-First, run the development server:
+- The **frontend** (Next.js) provides a modern chat widget and a cart experience.
+- The **backend** (FastAPI + Postgres) runs a **LangGraph agent** with tool-calling for product search and cart actions.
+- The agent streams responses to the UI and emits **structured “actions”** (as JSON blocks) so the frontend can reliably update cart state and navigate.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Features
+
+- **Streaming chat UI** (token-by-token response streaming)
+- **Tool calling / agentic workflow** (LangGraph)
+- **Cart actions backed by Postgres** (`add_to_cart`, `remove_from_cart`, `update_cart_quantity`, `get_cart`)
+- **Product search** with fuzzy matching
+- **UI state sync**: backend tool outputs are injected into the stream as ` ```json ... ``` ` blocks, and the frontend parses them to:
+  - navigate (e.g. `"/cart"`)
+  - update cart (add/remove/update quantity)
+- **Guardrails**: step limit, tool timeouts, basic sanitization
+- **API protections**: rate limiting + concurrency limits
+- **CI**: frontend lint/build + backend lint/tests
+
+## Architecture (high level)
+
+```
+Next.js (UI)  --->  Next.js /api/chat (proxy, streaming)  --->  FastAPI /api/chat (StreamingResponse)
+   |                                                                      |
+   |<--- streamed tokens + ```json action blocks``` ----------------------|
+   |
+CartProvider (local state)  <--- action blocks --->  Postgres (cart/products)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Frontend**: Next.js (App Router), TypeScript, Tailwind, shadcn/ui
+- **Backend**: FastAPI, SQLAlchemy, Postgres, LangChain + LangGraph
+- **Infra**: Docker Compose (Postgres)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Prerequisites
 
-## Learn More
+- Node.js 20+
+- Python 3.11+
+- Docker (for Postgres)
+- An OpenAI API key (for the agent)
 
-To learn more about Next.js, take a look at the following resources:
+## Quickstart (local)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 1) Start Postgres
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+make db-up
+```
 
-## Deploy on Vercel
+Postgres will be available on `localhost:5433` (mapped to container `5432`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 2) Install dependencies
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+make install
+```
+
+### 3) Set environment variables
+
+Create a `.env` file (recommended) or export environment variables in your shell.
+
+Required:
+
+```bash
+export OPENAI_API_KEY="YOUR_KEY_HERE"
+```
+
+Optional (defaults shown):
+
+```bash
+export DATABASE_URL="postgresql://user:password@localhost:5433/techshop"
+```
+
+### 4) Seed the database
+
+```bash
+make seed
+```
+
+### 5) Run backend + frontend (two terminals)
+
+Backend:
+
+```bash
+make dev-backend
+```
+
+Frontend:
+
+```bash
+make dev-frontend
+```
+
+Open:
+
+- Frontend: `http://localhost:3000`
+- Backend health: `http://localhost:8000/api/health`
+
+## Run with Docker Compose (recommended for demo/deployment)
+
+This repo includes a full-stack `docker-compose.yml` (Postgres + backend + frontend).
+
+Required environment variables:
+
+```bash
+export OPENAI_API_KEY="YOUR_KEY_HERE"
+```
+
+Optional environment variables:
+
+```bash
+export OPENAI_MODEL="gpt-5-mini"
+export CORS_ALLOW_ORIGINS="http://localhost:3000"
+export BACKEND_URL="http://127.0.0.1:8000"
+```
+
+Start the stack:
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8000`
+
+Notes:
+
+- The frontend calls `POST /api/chat` which proxies to the backend using `BACKEND_URL`.
+- In Docker Compose, the frontend container is configured with `BACKEND_URL=http://backend:8000`.
+
+## Demo prompts
+
+Try these in the chat widget:
+
+- “Suggest me a phone under $800 for photography.”
+- “Show me accessories from Apple.”
+- “Add the first result to my cart.”
+- “Increase the quantity to 2.”
+- “Show my cart.”
+
+## Configuration
+
+- **System prompt**: `backend/app/config/prompts.yaml`
+- **Backend CORS**: `backend/app/main.py` reads `CORS_ALLOW_ORIGINS` (defaults to `http://localhost:3000`)
+- **Frontend -> backend URL**: Next.js proxy (`src/app/api/chat/route.ts`) reads `BACKEND_URL` (defaults to `http://127.0.0.1:8000`)
+- **Database URL**: `backend/app/database.py` reads `DATABASE_URL` and defaults to:
+  - `postgresql://user:password@localhost:5433/techshop`
+
+## Testing
+
+Backend tests:
+
+```bash
+make test-backend
+```
+
+### Real-LLM tool-accuracy evals
+
+These evals run against a real OpenAI model and validate **tool calling accuracy** (e.g., that the model actually calls `search_products`, `add_to_cart`, etc., with correct arguments).
+
+They are **skipped by default** unless you explicitly enable them.
+
+Required environment variables:
+
+```bash
+export RUN_REAL_LLM_EVAL=1
+export OPENAI_API_KEY="YOUR_KEY_HERE"
+export DATABASE_URL="postgresql://user:password@localhost:5433/techshop"
+```
+
+Optional:
+
+```bash
+export OPENAI_MODEL="gpt-5-mini"
+```
+
+Run:
+
+```bash
+PYTHONPATH=. pytest backend/tests/test_real_llm_tool_accuracy.py -q
+```
+
+Frontend lint:
+
+```bash
+make lint-frontend
+```
+
+Backend lint (requires dev deps):
+
+```bash
+make install-backend-dev
+make lint-backend
+```
+
+## Troubleshooting
+
+- **Database connection errors**
+  - Ensure Postgres is running: `make db-up`
+  - Confirm the port mapping is `5433:5432` in `docker-compose.yml`
+  - The default local DSN is `postgresql://user:password@localhost:5433/techshop`
+
+- **Chat can’t reach backend**
+  - Ensure backend is running on `http://localhost:8000`
+  - The chat widget calls `POST /api/chat` (Next.js), which proxies to the backend using `BACKEND_URL`
+  - In Docker Compose, `BACKEND_URL` is set to `http://backend:8000` for the frontend container
+
+- **Rate limiting**
+  - The chat endpoint is rate limited (`10/minute`). If you hit limits, wait a bit and retry.
+
+## License
+
+MIT (or replace with your preferred license)
