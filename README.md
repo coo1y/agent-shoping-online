@@ -23,13 +23,21 @@ The focus is not just on prompting, but on **agent reliability, UI state synchro
 
 ## Architecture (high level)
 
-```
-Next.js (UI)  --->  Next.js /api/chat (proxy, streaming)  --->  FastAPI /api/chat (StreamingResponse)
-   |                                                                      |
-   |<--- streamed tokens + ```json action blocks``` ----------------------|
-   |
-CartProvider (local state)  <--- action blocks --->  Postgres (cart/products)
-```
+**System Architecture**
+![High-level system architecture](img/system_architecture.png)
+
+**Agent Architecture**
+![High-level agent architecture](img/agent_architecture.png)
+
+- **Input Guard Node**: First entry point that sanitizes user input by redacting PII (email, phone, credit card) and logs the sanitized input. Resets step counter to 0.
+- **Chatbot Node**: Core AI reasoning node that uses OpenAI model with tool-calling capabilities. Includes retry logic (max 2 attempts) and output sanitization. Increments step counter by 1.
+- **Tools Node**: Executes tool calls with validation guards. Enforces input size limits (500 chars max), tool timeouts (10 seconds), and graceful error handling. 
+  - Available tools: search_products, get_cart, add_to_cart, remove_from_cart, update_cart_quantity, get_product_details, navigate_to_product.
+- **Fallback Node**: Safety mechanism triggered when step count exceeds maximum (5 steps). Returns a helpful error message asking user to rephrase their request.
+- **Conditional Flow Logic**: After chatbot response, the system checks:
+  - Tools path: If model made tool calls → execute tools → return to chatbot
+  - Fallback path: If step count is more than 5 → trigger fallback → end conversation
+  - End path: If no tool calls and within limits → end conversation normally
 
 ## Key design decisions
 

@@ -327,6 +327,11 @@ def create_agent_graph(db: Session, session_id: str):
     workflow.add_conditional_edges(
         "chatbot",
         should_continue,
+        {
+            "continue": "tools",
+            "max_tool_steps": "fallback",
+            "end": END,
+        },
     )
     
     workflow.add_edge("tools", "chatbot")
