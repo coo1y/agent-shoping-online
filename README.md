@@ -1,6 +1,6 @@
-# TechShop — AI Shopping Assistant
+# TechWise — Your AI Shopping Assistant
 
-TechShop is a **reference implementation** demonstrating how to design and ship **AI-powered systems** with streaming responses, tool calling, deterministic side effects, and evaluation loops.
+TechWise is a **reference implementation** demonstrating how to design and ship **AI-powered systems** with streaming responses, tool calling, deterministic side effects, and evaluation loops.
 
 The focus is not just on prompting, but on **agent reliability, UI state synchronization, and production-style guardrails** that are required in real-world AI/ML applications.
 
@@ -261,6 +261,16 @@ make lint-backend
 - **Rate limiting**
   - The chat endpoint is rate limited (`10/minute`). If you hit limits, wait a bit and retry.
 
+## Demo
+
+[![TechWise - Your AI Shopping Assistant](https://img.youtube.com/vi/oAG9yIS7enU/0.jpg)](https://www.youtube.com/watch?v=oAG9yIS7enU)
+
+**What the demo shows:**
+- Suggesting products
+- Comparing products
+- Navigating to pages
+- Managing cart: add/remove products, change quantity
+
 ## Known limitations & future improvements
 
 - Single-user cart model (no authentication)
@@ -271,7 +281,3 @@ make lint-backend
 Future improvements could include per-user carts, semantic search with embeddings,
 retry/reconciliation logic for failed tool calls, and richer agent metrics for
 tuning and evaluation.
-
-## License
-
-MIT (or replace with your preferred license)
