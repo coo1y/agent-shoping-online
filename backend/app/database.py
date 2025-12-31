@@ -3,11 +3,15 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+# Load DATABASE_URL from backend/.env
+env_path = Path(__file__).resolve().parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
-# Use localhost:5433 if running locally (to match docker-compose port mapping), or the service name 'db' if in docker
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5433/techshop")
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+print(f"Connecting to database: {DATABASE_URL.split('@')[-1]}") # Log DB host/name (hide creds)
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

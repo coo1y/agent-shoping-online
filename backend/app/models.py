@@ -29,6 +29,12 @@ class Product(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
+    @property
+    def description(self):
+        if self.specs and isinstance(self.specs, dict):
+            return self.specs.get("description", f"{self.brand} {self.name}")
+        return f"{self.brand} {self.name}"
+
 class Cart(Base):
     __tablename__ = "carts"
     

@@ -34,17 +34,7 @@ def read_products(skip: int = 0, limit: int = 100, category: str = None, db: Ses
 
 @router.get("/{product_identifier}", response_model=schemas.Product)
 def read_product(product_identifier: str, db: Session = Depends(database.get_db)):
-    # Try to find by UUID first
-    from uuid import UUID
-    try:
-        uuid_obj = UUID(product_identifier)
-        product = db.query(models.Product).filter(models.Product.id == uuid_obj).first()
-        if product:
-            return product
-    except ValueError:
-        pass
-    
-    # Fallback to finding by product_id string
+    # Find by product_id string
     product = db.query(models.Product).filter(models.Product.product_id == product_identifier).first()
     
     if product is None:

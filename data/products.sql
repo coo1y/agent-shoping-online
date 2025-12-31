@@ -593,3 +593,8 @@ VALUES
    "adjustable":true,
    "weight_g":180
  }',4.4,100,NULL);
+
+-- Update image_url for all products
+UPDATE products 
+SET image_url = '/images/products/' || product_id || '.jpg'
+WHERE image_url IS NULL;
