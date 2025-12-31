@@ -24,9 +24,11 @@ The focus is not just on prompting, but on **agent reliability, UI state synchro
 ## Architecture (high level)
 
 **System Architecture**
+
 ![High-level system architecture](img/system_architecture.png)
 
 **Agent Architecture**
+
 ![High-level agent architecture](img/agent_architecture.png)
 
 - **Input Guard Node**: First entry point that sanitizes user input by redacting PII (email, phone, credit card) and logs the sanitized input. Resets step counter to 0.
