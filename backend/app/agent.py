@@ -28,7 +28,7 @@ class RequestAdapter(logging.LoggerAdapter):
         return '[Req: %s] %s' % (req_id, msg), kwargs
 
 # --- Guardrails Configuration ---
-MAX_TOOL_STEPS = 5
+MAX_TOOL_STEPS = 20
 MAX_TOOL_INPUT_CHAR = 500
 TOOL_TIMEOUT_SECONDS = 10
 
@@ -305,11 +305,11 @@ def create_agent_graph(db: Session, session_id: str):
         
         # Loop Guard
         if step_count > MAX_TOOL_STEPS:
-            return "fallback"
+            return "max_tool_steps"
         
         if hasattr(last_message, "tool_calls") and last_message.tool_calls:
-            return "tools"
-        return "__end__"
+            return "continue"
+        return "end"
 
     # --- Graph Construction ---
     
