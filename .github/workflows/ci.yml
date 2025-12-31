@@ -90,5 +90,5 @@ jobs:
 
       - name: Run unit tests
         env:
-          PYTHONPATH: .
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pytest backend/tests
