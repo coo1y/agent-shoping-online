@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.DS_Store
+.env*
+.dockerignore
+Dockerfile
+docker-compose.yml
+README.md
+build
+dist
+coverage
