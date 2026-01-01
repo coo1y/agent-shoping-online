@@ -12,7 +12,7 @@ The focus is not just on prompting, but on **agent reliability, UI state synchro
 
 - **Streaming chat UI** (token-by-token response streaming)
 - **Tool calling / agentic workflow** (LangGraph)
-- **Cart actions backed by Postgres** (`add_to_cart`, `remove_from_cart`, `update_cart_quantity`, `get_cart`)
+- **Cart actions** (`add_to_cart`, `remove_from_cart`, `update_cart_quantity`, `get_cart`)
 - **Product search** with fuzzy matching
 - **UI state sync**: backend tool outputs are injected into the stream as ` ```json ... ``` ` blocks, and the frontend parses them to:
   - navigate (e.g. `"/cart"`)
@@ -51,10 +51,6 @@ The focus is not just on prompting, but on **agent reliability, UI state synchro
 - **LangGraph over ad-hoc agent loops**  
   LangGraph provides explicit control flow, step limits, and better debuggability
   compared to custom while-loop agents.
-
-- **Postgres-backed cart state**  
-  Cart state is persisted in the database instead of relying on model memory,
-  preventing hallucinated state and enabling idempotent operations.
 
 - **Opt-in real-LLM evals**  
   Tool-calling accuracy is validated against a real model to catch regressions,
